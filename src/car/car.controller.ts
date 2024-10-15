@@ -2,9 +2,10 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 
@@ -13,42 +14,66 @@ import { CAR_ROUTES } from './car.routes';
 import { CarService } from './car.service';
 
 import type { SearchCar } from './interfaces/search-car.interface';
-import type { Response } from 'src/common/interfaces/responses.interface';
-import type {
-  GetCarResponse,
-  GetCarsResponse,
-} from './interfaces/responses.interface';
 import { CreateCarDto } from './dto/create-car.dto';
+
+import { ValidateIdPipe } from 'src/common/pipes/validate-id.pipe';
+import { UpdateCarDto } from './dto/update-car.dto';
 
 @Controller(CAR_ROUTES.BASE)
 export class CarController {
   constructor(private readonly carService: CarService) {}
 
   @Get()
-  getCars(@Query() query: SearchCar): GetCarsResponse {
+  async getCars(@Query() query: SearchCar) {
+    const cars = await this.carService.getCars(query);
+
+    const message =
+      cars.length === 0
+        ? "There isn't any cars"
+        : `Car${cars.length === 1 ? '' : 's'} found`;
+
     return {
       statusCode: 200,
-      message: 'Cars found',
-      cars: this.carService.getCars(query),
+      message,
+      cars,
     };
   }
 
   @Get(':id')
-  getCar(@Param('id', ParseIntPipe) id: number): GetCarResponse {
+  async getCar(@Param('id', ValidateIdPipe) id: string) {
+    const car = await this.carService.getCar(id);
+
+    if (!car) throw new NotFoundException('Car not found');
+
     return {
       statusCode: 200,
       message: 'Car found',
-      car: this.carService.getCar(id),
+      car,
     };
   }
 
   @Post()
-  postCar(@Body() car: CreateCarDto): Response {
-    this.carService.postCar(car);
+  async postCar(@Body() car: CreateCarDto) {
+    await this.carService.postCar(car);
 
     return {
       statusCode: 201,
       message: 'Car created',
+    };
+  }
+
+  @Put(':id')
+  async putCar(
+    @Param('id', ValidateIdPipe) id: string,
+    @Body() car: UpdateCarDto,
+  ) {
+    const updatedCar = await this.carService.putCar(id, car);
+
+    if (!updatedCar) throw new NotFoundException('Car not found');
+
+    return {
+      statusCode: 200,
+      message: 'Car updated',
     };
   }
 }
