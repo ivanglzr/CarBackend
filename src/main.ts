@@ -8,14 +8,19 @@ import {
 import { ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
-
-const PORT = process.env.PORT ?? 3900;
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({
+      ignoreTrailingSlash: true,
+    }),
   );
+
+  const configService = app.select(AppModule).get(ConfigService);
+
+  const PORT = configService.get<string>('PORT') ?? 3900;
 
   app.useGlobalPipes(new ValidationPipe());
 
