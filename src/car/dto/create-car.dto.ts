@@ -6,9 +6,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { CarWithoutId, FuelTypes } from '../interfaces/car.interface';
+import { Car } from '../schemas/car.schema';
+import { FuelTypes } from '../interfaces/fuel-types.interface';
 
-export class CreateCarDto implements CarWithoutId {
+export class CreateCarDto implements Car {
   @IsString()
   @IsNotEmpty()
   brand: string;

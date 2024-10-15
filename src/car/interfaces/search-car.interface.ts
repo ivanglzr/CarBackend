@@ -1,3 +1,3 @@
-import { Car } from './car.interface';
+import { Car } from '../schemas/car.schema';
 
-export type SearchCar = Partial<Omit<Car, 'id'>>;
+export type SearchCar = Partial<Car>;
