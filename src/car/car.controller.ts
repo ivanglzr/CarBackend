@@ -1,6 +1,8 @@
 import {
   Body,
+  ConflictException,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -54,7 +56,9 @@ export class CarController {
 
   @Post()
   async postCar(@Body() car: CreateCarDto) {
-    await this.carService.postCar(car);
+    const newCar = await this.carService.postCar(car);
+
+    if (!newCar) throw new ConflictException('Car already exists');
 
     return {
       statusCode: 201,
@@ -74,6 +78,18 @@ export class CarController {
     return {
       statusCode: 200,
       message: 'Car updated',
+    };
+  }
+
+  @Delete(':id')
+  async deleteCar(@Param('id', ValidateIdPipe) id: string) {
+    const deletedCar = await this.carService.deleteCar(id);
+
+    if (!deletedCar) throw new NotFoundException();
+
+    return {
+      statusCode: 200,
+      message: 'Car deleted',
     };
   }
 }
