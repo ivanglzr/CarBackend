@@ -21,7 +21,14 @@ export class CarService {
     return await this.carModel.findById(id);
   }
 
-  async postCar(car: CreateCarDto) {
+  async postCar(car: CreateCarDto): Promise<Car | null> {
+    const carExists = await this.carModel.findOne({
+      model: car.model,
+      brand: car.brand,
+    });
+
+    if (carExists) return null;
+
     const newCar = new this.carModel(car);
 
     await newCar.save();
@@ -29,9 +36,17 @@ export class CarService {
     return newCar;
   }
 
-  async putCar(id: string, car: UpdateCarDto) {
+  async putCar(id: string, car: UpdateCarDto): Promise<Car> {
     const updatedCar = await this.carModel.findByIdAndUpdate(id, car);
 
     return updatedCar;
+  }
+
+  async deleteCar(id: string): Promise<Car | null> {
+    const deletedCar = await this.carModel.findByIdAndDelete(id);
+
+    if (!deletedCar) return null;
+
+    return deletedCar;
   }
 }
