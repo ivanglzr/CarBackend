@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { CAR_ROUTES } from './car.routes';
@@ -17,11 +18,14 @@ import { CarService } from './car.service';
 
 import type { SearchCar } from './interfaces/search-car.interface';
 import { CreateCarDto } from './dto/create-car.dto';
-
-import { ValidateIdPipe } from 'src/common/pipes/validate-id.pipe';
 import { UpdateCarDto } from './dto/update-car.dto';
 
+import { ValidateIdPipe } from 'src/common/pipes/validate-id.pipe';
+
+import { ValidateRequestGuard } from 'src/common/guards/validate-request.guard';
+
 @Controller(CAR_ROUTES.BASE)
+@UseGuards(ValidateRequestGuard)
 export class CarController {
   constructor(private readonly carService: CarService) {}
 
